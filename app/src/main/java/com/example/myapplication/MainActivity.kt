@@ -1,43 +1,57 @@
 package com.example.myapplication
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatTextView
+import androidx.lifecycle.ViewModelProvider
+import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
 
-    companion object{
+    companion object {
         const val TAG = "Main Activity"
+    }
+
+    val viewModel: SharedViewModel by lazy {
+        ViewModelProvider(this).get(SharedViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
-        val retrofit : Retrofit = Retrofit.Builder()
-            .baseUrl("https://rickandmortyapi.com/api/")
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
+        val nameTextView = findViewById<TextView>(R.id.nameTextView)
+        val headerImageView = findViewById<AppCompatImageView>(R.id.headerImageView)
+        val aliveTextView = findViewById<AppCompatTextView>(R.id.aliveTextView)
+        val originTextView = findViewById<AppCompatTextView>(R.id.originTextView)
+        val speciesTextView = findViewById<AppCompatTextView>(R.id.speciesTextView)
+        val genderImageView = findViewById<AppCompatImageView>(R.id.genderImageView)
 
-        val rickAndMortyService: RickAndMortyService = retrofit
-            .create(RickAndMortyService::class.java)
+        viewModel.refreshCharacter(4)
+        viewModel.characterByIdLiveData.observe(this) { response ->
+            if (response == null) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Unsuccessful network call!",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@observe
+            }
+            nameTextView.text = response.name
+            aliveTextView.text = response.status
+            speciesTextView.text = response.species
+            originTextView.text = response.origin.name
 
-        rickAndMortyService.getCharacterById().enqueue(object : Callback<Any> {
-            override fun onResponse(call: Call<Any>, response: Response<Any>) {
-                Log.i(TAG, response.toString())
+            if (response.gender.equals("male", true)) {
+                genderImageView.setImageResource(R.drawable.ic_male_24)
+            } else {
+                genderImageView.setImageResource(R.drawable.ic_female_24)
             }
 
-            override fun onFailure(call: Call<Any>, t: Throwable) {
-                Log.i(TAG, t.message ?: "Null message")
-            }
-        })
+            Picasso.get().load(response.image).into(headerImageView)
+        }
     }
 }
