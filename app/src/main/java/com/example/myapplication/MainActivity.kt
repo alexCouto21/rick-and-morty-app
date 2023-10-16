@@ -1,12 +1,14 @@
 package com.example.myapplication
 
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.lifecycle.ViewModelProvider
+import com.example.myapplication.data.GetCharacterByIdResponse
 import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
@@ -15,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         const val TAG = "Main Activity"
     }
 
-    val viewModel: SharedViewModel by lazy {
+    private val viewModel: SharedViewModel by lazy {
         ViewModelProvider(this).get(SharedViewModel::class.java)
     }
 
@@ -26,11 +28,11 @@ class MainActivity : AppCompatActivity() {
         val nameTextView = findViewById<TextView>(R.id.nameTextView)
         val headerImageView = findViewById<AppCompatImageView>(R.id.headerImageView)
         val aliveTextView = findViewById<AppCompatTextView>(R.id.aliveTextView)
-        val originTextView = findViewById<AppCompatTextView>(R.id.originTextView)
+        val originTextView = findViewById<AppCompatTextView>(R.id.planetTextView)
         val speciesTextView = findViewById<AppCompatTextView>(R.id.speciesTextView)
         val genderImageView = findViewById<AppCompatImageView>(R.id.genderImageView)
 
-        viewModel.refreshCharacter(4)
+        viewModel.refreshCharacter(12)
         viewModel.characterByIdLiveData.observe(this) { response ->
             if (response == null) {
                 Toast.makeText(
@@ -39,19 +41,24 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
                 return@observe
-            }
-            nameTextView.text = response.name
-            aliveTextView.text = response.status
-            speciesTextView.text = response.species
-            originTextView.text = response.origin.name
-
-            if (response.gender.equals("male", true)) {
-                genderImageView.setImageResource(R.drawable.ic_male_24)
             } else {
-                genderImageView.setImageResource(R.drawable.ic_female_24)
+                response.apply {
+                    nameTextView.text = name
+                    aliveTextView.text = status
+                    speciesTextView.text = species
+                    originTextView.text = origin.name
+                    setGenderImage(this, genderImageView)
+                    Picasso.get().load(image).into(headerImageView)
+                }
             }
+        }
+    }
 
-            Picasso.get().load(response.image).into(headerImageView)
+    private fun setGenderImage(response: GetCharacterByIdResponse, genderImageView: ImageView) {
+        if (response.gender.equals("male", true)) {
+            genderImageView.setImageResource(R.drawable.ic_male_24)
+        } else {
+            genderImageView.setImageResource(R.drawable.ic_female_24)
         }
     }
 }

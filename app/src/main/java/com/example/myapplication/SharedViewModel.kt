@@ -7,16 +7,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.GetCharacterByIdResponse
 import kotlinx.coroutines.launch
 
-class SharedViewModel: ViewModel() {
+class SharedViewModel : ViewModel() {
     private val repository = SharedRepository()
 
     private val _characterByIdLiveData = MutableLiveData<GetCharacterByIdResponse>()
-    val characterByIdLiveData : LiveData<GetCharacterByIdResponse> = _characterByIdLiveData
+    val characterByIdLiveData: LiveData<GetCharacterByIdResponse?>
+        get() = _characterByIdLiveData
 
-    fun refreshCharacter(characterId: Int){
+    fun refreshCharacter(characterId: Int) {
         viewModelScope.launch {
-            val response =repository.getCharacter(characterId)
-
+            //Todo Add loading state
+            val response = repository.getCharacter(characterId)!!
             _characterByIdLiveData.postValue(response)
         }
     }

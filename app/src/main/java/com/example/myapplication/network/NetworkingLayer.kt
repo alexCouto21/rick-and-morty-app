@@ -8,13 +8,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 object NetworkingLayer {
-    val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
-    val retrofit: Retrofit = Retrofit.Builder()
+    private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+    private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl("https://rickandmortyapi.com/api/")
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
 
-    val rickAndMortyService: RickAndMortyService by lazy {
+    private val rickAndMortyService: RickAndMortyService by lazy {
         retrofit.create(RickAndMortyService::class.java)
     }
 
