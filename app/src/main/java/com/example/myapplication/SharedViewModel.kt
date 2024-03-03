@@ -7,8 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.GetCharacterByIdResponse
 import kotlinx.coroutines.launch
 
-class SharedViewModel : ViewModel() {
-    private val repository = SharedRepository()
+class SharedViewModel (private val repository : SharedRepository) : ViewModel() {
 
     private val _characterByIdLiveData = MutableLiveData<GetCharacterByIdResponse>()
     val characterByIdLiveData: LiveData<GetCharacterByIdResponse?>

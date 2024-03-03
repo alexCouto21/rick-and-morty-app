@@ -2,13 +2,13 @@ package com.example.myapplication
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.myapplication.data.GetCharacterByIdResponse
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -16,7 +16,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 class SharedViewModelTest {
 
@@ -26,36 +25,38 @@ class SharedViewModelTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
-    private val dispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
-        Dispatchers.setMain(dispatcher)
-        mockRepository = mockk(relaxed = true) {
-            coEvery { getCharacter(any()) } returns mockk()
-        }
-        characterObserver = mockk()
-        viewModel = SharedViewModel()
-        viewModel.characterByIdLiveData.observeForever(characterObserver)
+        Dispatchers.setMain(Dispatchers.Unconfined)
+        mockRepository = mockk(relaxed = true)
+        characterObserver = mockk(relaxed = true)
+        viewModel = SharedViewModel(mockRepository)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        clearAllMocks()
     }
 
     @Test
     fun `refreshCharacter given character Id`() = runTest {
         //Given
-        val characterId = 12
-        val mockResponse = mockk<GetCharacterByIdResponse>()
+        val characterId = 20
+        val mockResponse = mockk<GetCharacterByIdResponse>(relaxed = true)
+        val liveDataUnderTest = viewModel.characterByIdLiveData
+
         coEvery { mockRepository.getCharacter(characterId) } returns mockResponse
+
         //When
         viewModel.refreshCharacter(characterId)
-        dispatcher.scheduler.advanceUntilIdle()
 
         //Then
-        coVerify(exactly = 0) { mockRepository.getCharacter(characterId) }
+        coVerify { mockRepository.getCharacter(characterId) }
+        liveDataUnderTest.observeForever(characterObserver)
+        verify { characterObserver.onChanged(mockResponse) }
+        liveDataUnderTest.removeObserver(characterObserver)
     }
 
 }

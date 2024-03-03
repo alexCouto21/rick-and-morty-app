@@ -1,0 +1,8 @@
+package com.example.myapplication
+
+sealed class UIState {
+//    object Loading : UIState()
+//    object Failure : UIState()
+//
+//    data class Success(): UIState()
+}

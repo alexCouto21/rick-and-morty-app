@@ -17,8 +17,11 @@ class MainActivity : AppCompatActivity() {
         const val TAG = "Main Activity"
     }
 
+    private val repository = SharedRepository()
+    private val viewModelFactory = SharedActivityViewModelFactory(repository)
+
     private val viewModel: SharedViewModel by lazy {
-        ViewModelProvider(this).get(SharedViewModel::class.java)
+        ViewModelProvider(this, viewModelFactory).get(SharedViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
