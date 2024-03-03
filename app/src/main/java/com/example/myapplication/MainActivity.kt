@@ -2,13 +2,11 @@ package com.example.myapplication
 
 import android.os.Bundle
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.data.GetCharacterByIdResponse
+import com.example.myapplication.databinding.ActivityMainBinding
 import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
@@ -19,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     private val repository = SharedRepository()
     private val viewModelFactory = SharedActivityViewModelFactory(repository)
+    private lateinit var binding: ActivityMainBinding
 
     private val viewModel: SharedViewModel by lazy {
         ViewModelProvider(this, viewModelFactory).get(SharedViewModel::class.java)
@@ -26,34 +25,28 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        val nameTextView = findViewById<TextView>(R.id.nameTextView)
-        val headerImageView = findViewById<AppCompatImageView>(R.id.headerImageView)
-        val aliveTextView = findViewById<AppCompatTextView>(R.id.aliveTextView)
-        val originTextView = findViewById<AppCompatTextView>(R.id.planetTextView)
-        val speciesTextView = findViewById<AppCompatTextView>(R.id.speciesTextView)
-        val genderImageView = findViewById<AppCompatImageView>(R.id.genderImageView)
-
-        viewModel.refreshCharacter(12)
+        viewModel.refreshCharacter(1)
         viewModel.characterByIdLiveData.observe(this) { response ->
-            if (response == null) {
-                Toast.makeText(
-                    this@MainActivity,
-                    "Unsuccessful network call!",
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@observe
-            } else {
-                response.apply {
-                    nameTextView.text = name
-                    aliveTextView.text = status
-                    speciesTextView.text = species
-                    originTextView.text = origin.name
-                    setGenderImage(this, genderImageView)
-                    Picasso.get().load(image).into(headerImageView)
-                }
+            response?.let {
+                updateUI(it)
+            } ?: run {
+                showToast()
             }
+        }
+    }
+
+    private fun updateUI(response: GetCharacterByIdResponse) {
+        response.apply {
+            binding.nameTextView.text = name
+            binding.aliveTextView.text = status
+            binding.speciesTextView.text = species
+            binding.originTextView.text = origin.name
+            setGenderImage(this, binding.genderImageView)
+            loadImage(response)
         }
     }
 
@@ -63,5 +56,17 @@ class MainActivity : AppCompatActivity() {
         } else {
             genderImageView.setImageResource(R.drawable.ic_female_24)
         }
+    }
+
+    private fun loadImage(response: GetCharacterByIdResponse) {
+        Picasso.get().load(response.image).into(binding.headerImageView)
+    }
+
+    private fun showToast() {
+        Toast.makeText(
+            this@MainActivity,
+            "Unsuccessful network call!",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }
