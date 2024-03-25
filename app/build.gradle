@@ -65,6 +65,14 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.8'
 
 
+    //Flipper
+    // Please verify Flipper version on https://mvnrepository.com/artifact/com.facebook.flipper/flipper-fresco-plugin
+
+    releaseImplementation 'com.github.theGlenn:flipper-android-no-op:0.1.0'
+
+    debugImplementation 'com.facebook.soloader:soloader:0.10.5'
+    debugImplementation 'com.facebook.flipper:flipper:0.182.0'
+    debugImplementation("com.facebook.flipper:flipper-network-plugin:0.182.0")
 
     def lifecycle_version = "2.3.0"
 

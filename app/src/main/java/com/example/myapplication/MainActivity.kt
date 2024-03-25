@@ -7,6 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.data.GetCharacterByIdResponse
 import com.example.myapplication.databinding.ActivityMainBinding
+import com.facebook.flipper.android.AndroidFlipperClient
+import com.facebook.flipper.plugins.network.NetworkFlipperPlugin
+import com.facebook.soloader.SoLoader
 import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initFlipper()
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
@@ -36,6 +40,15 @@ class MainActivity : AppCompatActivity() {
             } ?: run {
                 showToast()
             }
+        }
+    }
+
+    private fun initFlipper() {
+        SoLoader.init(this, false)
+        AndroidFlipperClient.getInstance(this).apply {
+            addPlugin(NetworkFlipperPlugin())
+        }.also {
+            it.start()
         }
     }
 
