@@ -1,7 +1,6 @@
 package com.example.myapplication
 
 import com.example.myapplication.data.GetCharacterByIdResponse
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path

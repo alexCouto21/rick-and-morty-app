@@ -15,7 +15,6 @@ class SharedViewModel (private val repository : SharedRepository) : ViewModel() 
 
     fun refreshCharacter(characterId: Int) {
         viewModelScope.launch {
-            //Todo Add loading state
             val response = repository.getCharacter(characterId)!!
             _characterByIdLiveData.postValue(response)
         }
