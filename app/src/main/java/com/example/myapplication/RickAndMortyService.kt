@@ -1,10 +1,14 @@
 package com.example.myapplication
 
-import retrofit2.Call
+import com.example.myapplication.data.GetCharacterByIdResponse
+import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 
 interface RickAndMortyService {
 
-    @GET("character/2")
-    fun getCharacterById(): Call<Any>
+    @GET("character/{character-id}")
+    suspend fun getCharacterById(
+        @Path("character-id") characterId: Int
+    ): Response<GetCharacterByIdResponse>
 }

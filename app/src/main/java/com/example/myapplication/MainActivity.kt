@@ -1,43 +1,85 @@
 package com.example.myapplication
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.example.myapplication.data.GetCharacterByIdResponse
+import com.example.myapplication.databinding.ActivityMainBinding
+import com.facebook.flipper.android.AndroidFlipperClient
+import com.facebook.flipper.plugins.network.NetworkFlipperPlugin
+import com.facebook.soloader.SoLoader
+import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
 
-    companion object{
+    companion object {
         const val TAG = "Main Activity"
+    }
+
+    private val repository = SharedRepository()
+    private val viewModelFactory = SharedActivityViewModelFactory(repository)
+    private lateinit var binding: ActivityMainBinding
+
+    private val viewModel: SharedViewModel by lazy {
+        ViewModelProvider(this, viewModelFactory).get(SharedViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        initFlipper()
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
-        val retrofit : Retrofit = Retrofit.Builder()
-            .baseUrl("https://rickandmortyapi.com/api/")
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
-
-        val rickAndMortyService: RickAndMortyService = retrofit
-            .create(RickAndMortyService::class.java)
-
-        rickAndMortyService.getCharacterById().enqueue(object : Callback<Any> {
-            override fun onResponse(call: Call<Any>, response: Response<Any>) {
-                Log.i(TAG, response.toString())
+        viewModel.refreshCharacter(1)
+        viewModel.characterByIdLiveData.observe(this) { response ->
+            response?.let {
+                updateUI(it)
+            } ?: run {
+                showToast()
             }
+        }
+    }
 
-            override fun onFailure(call: Call<Any>, t: Throwable) {
-                Log.i(TAG, t.message ?: "Null message")
-            }
-        })
+    private fun initFlipper() {
+        SoLoader.init(this, false)
+        AndroidFlipperClient.getInstance(this).apply {
+            addPlugin(NetworkFlipperPlugin())
+        }.also {
+            it.start()
+        }
+    }
+
+    private fun updateUI(response: GetCharacterByIdResponse) {
+        response.apply {
+            binding.nameTextView.text = name
+            binding.aliveTextView.text = status
+            binding.speciesTextView.text = species
+            binding.originTextView.text = origin.name
+            setGenderImage(this, binding.genderImageView)
+            loadImage(response)
+        }
+    }
+
+    private fun setGenderImage(response: GetCharacterByIdResponse, genderImageView: ImageView) {
+        if (response.gender.equals("male", true)) {
+            genderImageView.setImageResource(R.drawable.ic_male_24)
+        } else {
+            genderImageView.setImageResource(R.drawable.ic_female_24)
+        }
+    }
+
+    private fun loadImage(response: GetCharacterByIdResponse) {
+        Picasso.get().load(response.image).into(binding.headerImageView)
+    }
+
+    private fun showToast() {
+        Toast.makeText(
+            this@MainActivity,
+            "Unsuccessful network call!",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }
