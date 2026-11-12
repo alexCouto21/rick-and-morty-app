@@ -8,7 +8,7 @@ import org.junit.Test
 class MainActivityTest {
 
     @get:Rule
-    val activityScenarioRule = activityScenarioRule<MainActivity>()
+    val activityScenarioRule = activityScenarioRule<RickAndMortyMainActivity>()
 
     @Test
     fun `create activity`() {

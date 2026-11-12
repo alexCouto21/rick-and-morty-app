@@ -1,7 +1,7 @@
 package com.example.myapplication.network
 
 import com.example.myapplication.ApiClient
-import com.example.myapplication.RickAndMortyService
+import com.example.myapplication.RickAndMortyAppService
 import com.facebook.flipper.android.AndroidFlipperClient
 import com.facebook.flipper.plugins.network.FlipperOkhttpInterceptor
 import com.facebook.flipper.plugins.network.NetworkFlipperPlugin
@@ -19,8 +19,8 @@ object NetworkingLayer {
         .client(buildOkHttp())
         .build()
 
-    private val rickAndMortyService: RickAndMortyService by lazy {
-        retrofit.create(RickAndMortyService::class.java)
+    private val rickAndMortyService: RickAndMortyAppService by lazy {
+        retrofit.create(RickAndMortyAppService::class.java)
     }
 
     val apiClient = ApiClient(rickAndMortyService)

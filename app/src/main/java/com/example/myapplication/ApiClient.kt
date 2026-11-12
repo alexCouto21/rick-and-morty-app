@@ -4,7 +4,7 @@ import com.example.myapplication.data.GetCharacterByIdResponse
 import retrofit2.Response
 
 class ApiClient(
-    private val rickAndMortyService: RickAndMortyService
+    private val rickAndMortyService: RickAndMortyAppService
 ) {
     suspend fun getCharacterById(characterId: Int): SimpleResponse<GetCharacterByIdResponse> {
         return safeApiCall { rickAndMortyService.getCharacterById(characterId) }

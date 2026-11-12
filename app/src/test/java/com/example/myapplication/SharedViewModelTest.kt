@@ -58,5 +58,4 @@ class SharedViewModelTest {
         verify { characterObserver.onChanged(mockResponse) }
         liveDataUnderTest.removeObserver(characterObserver)
     }
-
 }

@@ -12,10 +12,10 @@ import com.facebook.flipper.plugins.network.NetworkFlipperPlugin
 import com.facebook.soloader.SoLoader
 import com.squareup.picasso.Picasso
 
-class MainActivity : AppCompatActivity() {
+class RickAndMortyMainActivity : AppCompatActivity() {
 
     companion object {
-        const val TAG = "Main Activity"
+        const val TAG = "RickAndMortyMainActivity"
     }
 
     private val repository = SharedRepository()
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        viewModel.refreshCharacter(1)
+        viewModel.refreshCharacter(3)
         viewModel.characterByIdLiveData.observe(this) { response ->
             response?.let {
                 updateUI(it)
@@ -54,12 +54,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUI(response: GetCharacterByIdResponse) {
         response.apply {
-            binding.nameTextView.text = name
-            binding.aliveTextView.text = status
-            binding.speciesTextView.text = species
-            binding.originTextView.text = origin.name
+            with(binding){
+                nameTextView.text = name
+                aliveTextView.text = status
+                speciesTextView.text = species
+                originTextView.text = origin.name
+            }
             setGenderImage(this, binding.genderImageView)
-            loadImage(response)
+            loadImage(this)
         }
     }
 
@@ -77,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showToast() {
         Toast.makeText(
-            this@MainActivity,
+            this@RickAndMortyMainActivity,
             "Unsuccessful network call!",
             Toast.LENGTH_SHORT
         ).show()
